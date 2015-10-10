@@ -1,0 +1,56 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: sassaas
+host: localhost
+basePath: /v1
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /sass:
+    put:
+      x-swagger-router-controller: Sass
+      description: Returns CSS by compiling an input Sass template
+      operationId: compileSass
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: template
+          in: formData
+          description: sass zip file
+          type: file
+        - name: fields
+          in: query
+          description: Some value
+          type: array
+          items:
+            $ref: "#/definitions/KeyValue"
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: "file"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+definitions:
+  KeyValue:
+    type: object
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
