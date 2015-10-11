@@ -1,12 +1,14 @@
 package com.mendix.ux.sassaas;
 
-import com.vaadin.sass.SassCompiler;
+import io.bit3.jsass.Compiler;
+import io.bit3.jsass.Options;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.security.InvalidParameterException;
 import java.util.Collection;
 import java.util.List;
@@ -81,8 +83,12 @@ public class SCSSTemplateProcessor {
         if (output.equals(entry)) {
             throw new InvalidParameterException(String.format("EntryPoint must be a relative path to a .scss file: %s ", entry));
         }
-        String args[] = {entry, output};
-        SassCompiler.main(args);
+        URI inputURI = new File(entry).toURI();
+        URI outputURI = new File(output).toURI();
+        Compiler compiler = new Compiler();
+        Options options = new Options();
+        options.setPrecision();
+        compiler.compileFile(inputURI, outputURI, options);
     }
 
     public static File createTempDir() throws IOException {
