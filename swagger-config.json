@@ -1,0 +1,6 @@
+{
+    "invokerPackage": "com.mendix.ux.sassaas.specs",
+    "groupId": "com.mendix.ux",
+    "artifactId": "sassaas-specs",
+    "artifactVersion": "1.0.0"
+}

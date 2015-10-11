@@ -14,7 +14,7 @@ produces:
 
 paths:
   /sass:
-    put:
+    post:
       x-swagger-router-controller: Sass
       description: Returns CSS by compiling an input Sass template
       operationId: compileSass
@@ -25,15 +25,17 @@ paths:
           in: formData
           description: sass zip file
           type: file
-        - name: fields
+        - name: variables
           in: query
-          description: Some value
-          type: array
-          items:
-            $ref: "#/definitions/KeyValue"
+          description: 'List of variables to apply in JSON format. For instance: [{"color1": "#123"}, {"font": "Sans"}]'
+          type: string
+        - name: entrypoints
+          in: query
+          description: 'List of entrypoints to apply in JSON format. For instance: ["index.scss", "custom.scss"]'
+          type: string
       responses:
         "200":
-          description: Success
+          description: Success, a processed template as zip file
           schema:
             type: "file"
         default:
@@ -41,13 +43,6 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 definitions:
-  KeyValue:
-    type: object
-    properties:
-      name:
-        type: string
-      value:
-        type: string
   ErrorResponse:
     required:
       - message

@@ -1,0 +1,6 @@
+multipart:
+  maxFileSize: 100MB
+  maxRequestSize: 100MB
+logging:
+  level:
+    org.springframework.web: DEBUG
