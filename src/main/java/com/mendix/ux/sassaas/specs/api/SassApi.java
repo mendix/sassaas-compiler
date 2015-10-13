@@ -4,23 +4,15 @@
 
 package com.mendix.ux.sassaas.specs.api;
 
-import com.mendix.ux.sassaas.specs.model.*;
-
-import java.io.File;
-import com.mendix.ux.sassaas.specs.model.ErrorResponse;
-
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.File;
 
-import static org.springframework.http.MediaType.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RequestMapping(value = "/sass", produces = {APPLICATION_JSON_VALUE})
 public interface SassApi {
@@ -32,10 +24,11 @@ public interface SassApi {
         * Parameters:
         * @ApiParam(value = "file detail") MultipartFile fileDetail
         * @ApiParam(value = "List of variables to apply in JSON format. For instance: [{\"color1\": \"#123\"}, {\"font\": \"Sans\"}]") String variables
-        * @ApiParam(value = "List of entrypoints to apply in JSON format. For instance: [\"index.scss\", \"custom.scss\"]") String entrypoints
+        * @ApiParam(value = "List of entrypoints to apply in JSON format. For instance: [{\"index.scss\": \"index.css\"}, {\"custom.scss\": \"custom.css\"}]") String entrypoints
+        * @ApiParam(value = "Type of output. Valid values are: zip or css; default is zip") String output
         *
         * @ApiResponses(value = { 
-        *     @ApiResponse(code = 200, message = "Success, a processed template as zip file"),
+        *     @ApiResponse(code = 200, message = "Success"),
         *     @ApiResponse(code = 0, message = "Error") })
         **/
         @RequestMapping(value = "",
@@ -47,6 +40,8 @@ public interface SassApi {
 @RequestPart("file") MultipartFile fileDetail,@RequestParam(value = "variables", required = false) String variables
 
 ,@RequestParam(value = "entrypoints", required = false) String entrypoints
+
+,@RequestParam(value = "output", required = false) String output
 
 )
         throws Exception;

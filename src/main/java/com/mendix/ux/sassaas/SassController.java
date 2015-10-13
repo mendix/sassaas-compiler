@@ -1,6 +1,7 @@
 package com.mendix.ux.sassaas;
 
 import com.mendix.ux.sassaas.specs.api.SassApi;
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -11,9 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,25 +24,49 @@ public class SassController implements SassApi {
 
     @Override
     @RequestMapping(method = RequestMethod.POST)
-    public File compileSass(@RequestPart("template") MultipartFile fileDetail, @RequestParam(value = "variables", required = false) String variables, @RequestParam(value = "entrypoints", required = false) String entrypoints) throws Exception {
-        File inputFile = writeInputStreamToFile(fileDetail.getInputStream());
-        Map<String, String> mapping = convertFields(variables);
-        List<String> entryPoints = convertEntryPoints(entrypoints);
-        SCSSTemplateProcessor processor = new SCSSTemplateProcessor(inputFile.getAbsolutePath(), mapping, entryPoints);
-        File exported = processor.export();
-        if (response != null) {
-            response.setContentType("application/zip");
-            response.setHeader("Content-Disposition", String.format("attachment; filename=compiled-%s", fileDetail.getOriginalFilename()));
-            OutputStream outputStream = response.getOutputStream();
-            outputStream.write(FileUtils.readFileToByteArray(exported));
-            IOUtils.closeQuietly(outputStream);
+    public File compileSass(@RequestPart(value = "package", required = false) MultipartFile fileDetail, @RequestParam(value = "variables", required = false) String variables, @RequestParam(value = "entrypoints", required = false) String entrypoints, @RequestParam(value = "output", required = false) String output) throws Exception {
+        File inputFile = null;
+        SCSSTemplateProcessor processor = null;
+
+        if (fileDetail != null) {
+            inputFile = writeInputStreamToFile(fileDetail.getInputStream());
+        } else {
+            inputFile = writeInputStreamToFile(getClass().getResourceAsStream("/default-theme.zip"));
         }
-        processor.cleanup();
-        inputFile.delete();
-        if (response != null) {
-            response.flushBuffer();
+        try {
+            Map<String, String> mapping = convertFields(variables);
+            Map<String, String> entryPoints = convertFields(entrypoints);
+            processor = new SCSSTemplateProcessor(inputFile.getAbsolutePath(), mapping, entryPoints);
+            processor.compileAll();
+            if (response != null) {
+                OutputStream outputStream = response.getOutputStream();
+                if ("css".equals(output)) {
+                    serveCss(processor, outputStream, "theme.css");
+                } else {
+                    serveZip(processor, outputStream, "theme.zip");
+                }
+                IOUtils.closeQuietly(outputStream);
+                response.flushBuffer();
+            }
+        } finally {
+            //if (processor != null) processor.cleanup();
+            if (inputFile.exists()) inputFile.delete();
         }
         return null;
+    }
+
+    private void serveCss(SCSSTemplateProcessor processor, OutputStream out, String outputFilename) throws ZipException, IOException {
+        File exported = processor.exportCss();
+        response.setContentType("text/css");
+        response.setHeader("Content-Disposition", String.format("attachment; filename=compiled-%s", outputFilename));
+        out.write(FileUtils.readFileToByteArray(exported));
+    }
+
+    private void serveZip(SCSSTemplateProcessor processor, OutputStream out, String outputFilename) throws ZipException, IOException {
+        File exported = processor.exportZip();
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", String.format("attachment; filename=compiled-%s", outputFilename));
+        out.write(FileUtils.readFileToByteArray(exported));
     }
 
     private File writeInputStreamToFile(InputStream inputStream) throws IOException {
@@ -71,16 +94,5 @@ public class SassController implements SassApi {
             }
         }
         return mapping;
-    }
-
-    private List<String> convertEntryPoints(String entryPoints) {
-        List<String> entries = new ArrayList<String>();
-        if (entryPoints != null) {
-            JSONArray jsonArray = new JSONArray(entryPoints);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                entries.add(jsonArray.getString(i));
-            }
-        }
-        return entries;
     }
 }

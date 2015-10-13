@@ -5,7 +5,7 @@ public interface SassApiTests {
     /**
     * @ApiOperation(value = "", notes = "Returns CSS by compiling an input Sass template", response = File.class)
     * @ApiResponses(value = { 
-        *     @ApiResponse(code = 200, message = "Success, a processed template as zip file"),
+        *     @ApiResponse(code = 200, message = "Success"),
         *     @ApiResponse(code = 0, message = "Error") })
     **/
     public void compileSass() throws Exception;

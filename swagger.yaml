@@ -23,19 +23,27 @@ paths:
       parameters:
         - name: template
           in: formData
-          description: sass zip file
+          description: sass zip file; if not provided a default theme is used
+          required: false
           type: file
         - name: variables
           in: query
           description: 'List of variables to apply in JSON format. For instance: [{"color1": "#123"}, {"font": "Sans"}]'
+          required: false
           type: string
         - name: entrypoints
           in: query
-          description: 'List of entrypoints to apply in JSON format. For instance: ["index.scss", "custom.scss"]'
+          description: 'List of entrypoints to apply in JSON format. For instance: [{"index.scss": "index.css"}, {"custom.scss": "custom.css"}]'
+          required: false
+          type: string
+        - name: output
+          in: query
+          description: 'Type of output. Valid values are: zip or css; default is zip'
+          required: false
           type: string
       responses:
         "200":
-          description: Success, a processed template as zip file
+          description: Success
           schema:
             type: "file"
         default:
