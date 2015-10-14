@@ -4,15 +4,23 @@
 
 package com.mendix.ux.sassaas.specs.api;
 
+import com.mendix.ux.sassaas.specs.model.*;
+
+import java.io.File;
+import com.mendix.ux.sassaas.specs.model.ErrorResponse;
+
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import java.util.List;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.*;
 
 @RequestMapping(value = "/sass", produces = {APPLICATION_JSON_VALUE})
 public interface SassApi {
@@ -22,9 +30,8 @@ public interface SassApi {
         /**
         * @ApiOperation(value = "", notes = "Returns CSS by compiling an input Sass template", response = File.class)
         * Parameters:
-        * @ApiParam(value = "file detail") MultipartFile fileDetail
-        * @ApiParam(value = "List of variables to apply in JSON format. For instance: [{\"color1\": \"#123\"}, {\"font\": \"Sans\"}]") String variables
-        * @ApiParam(value = "List of entrypoints to apply in JSON format. For instance: [{\"index.scss\": \"index.css\"}, {\"custom.scss\": \"custom.css\"}]") String entrypoints
+        * @ApiParam(value = "List of variables to apply. For instance: color1@#123|font@Sans") String variables
+        * @ApiParam(value = "List of entrypoints to apply. For instance: index.scss@index.css|custom.scss@custom.css") String entrypoints
         * @ApiParam(value = "Type of output. Valid values are: zip or css; default is zip") String output
         *
         * @ApiResponses(value = { 
@@ -33,11 +40,9 @@ public interface SassApi {
         **/
         @RequestMapping(value = "",
 
-        consumes = { "multipart/form-data" },
-        method = RequestMethod.POST)
-        public File compileSass(
 
-@RequestPart("file") MultipartFile fileDetail,@RequestParam(value = "variables", required = false) String variables
+        method = RequestMethod.GET)
+        public File compileSass(@RequestParam(value = "variables", required = false) String variables
 
 ,@RequestParam(value = "entrypoints", required = false) String entrypoints
 

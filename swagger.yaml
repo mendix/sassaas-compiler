@@ -7,33 +7,22 @@ basePath: /v1
 schemes:
   - http
   - https
-consumes:
-  - application/json
-produces:
-  - application/json
 
 paths:
   /sass:
-    post:
+    get:
       x-swagger-router-controller: Sass
       description: Returns CSS by compiling an input Sass template
       operationId: compileSass
-      consumes:
-        - multipart/form-data
       parameters:
-        - name: template
-          in: formData
-          description: sass zip file; if not provided a default theme is used
-          required: false
-          type: file
         - name: variables
           in: query
-          description: 'List of variables to apply in JSON format. For instance: [{"color1": "#123"}, {"font": "Sans"}]'
+          description: 'List of variables to apply. For instance: color1@#123|font@Sans'
           required: false
           type: string
         - name: entrypoints
           in: query
-          description: 'List of entrypoints to apply in JSON format. For instance: [{"index.scss": "index.css"}, {"custom.scss": "custom.css"}]'
+          description: 'List of entrypoints to apply. For instance: index.scss@index.css|custom.scss@custom.css'
           required: false
           type: string
         - name: output

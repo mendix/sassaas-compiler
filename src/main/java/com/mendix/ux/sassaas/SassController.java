@@ -4,11 +4,11 @@ import com.mendix.ux.sassaas.specs.api.SassApi;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -23,16 +23,10 @@ public class SassController implements SassApi {
     HttpServletResponse response;
 
     @Override
-    @RequestMapping(method = RequestMethod.POST)
-    public File compileSass(@RequestPart(value = "package", required = false) MultipartFile fileDetail, @RequestParam(value = "variables", required = false) String variables, @RequestParam(value = "entrypoints", required = false) String entrypoints, @RequestParam(value = "output", required = false) String output) throws Exception {
-        File inputFile = null;
+    @RequestMapping(method = RequestMethod.GET)
+    public File compileSass(@RequestParam(value = "variables", required = false) String variables, @RequestParam(value = "entrypoints", required = false) String entrypoints, @RequestParam(value = "output", required = false) String output) throws Exception {
         SCSSTemplateProcessor processor = null;
-
-        if (fileDetail != null) {
-            inputFile = writeInputStreamToFile(fileDetail.getInputStream());
-        } else {
-            inputFile = writeInputStreamToFile(getClass().getResourceAsStream("/default-theme.zip"));
-        }
+        File inputFile = writeInputStreamToFile(getClass().getResourceAsStream("/default-theme.zip"));
         try {
             Map<String, String> mapping = convertFields(variables);
             Map<String, String> entryPoints = convertFields(entrypoints);
@@ -49,7 +43,7 @@ public class SassController implements SassApi {
                 response.flushBuffer();
             }
         } finally {
-            //if (processor != null) processor.cleanup();
+            if (processor != null) processor.cleanup();
             if (inputFile.exists()) inputFile.delete();
         }
         return null;
@@ -81,16 +75,12 @@ public class SassController implements SassApi {
     private Map<String, String> convertFields(String variables) {
         Map<String, String> mapping = new HashMap<String, String>();
         if (variables != null) {
-            JSONArray jsonArray = new JSONArray(variables);
-            JSONObject jsonObject;
-            String key = null, value;
-            for (int i = 0; i < jsonArray.length(); i++) {
-                jsonObject = jsonArray.getJSONObject(i);
-                for (String k : jsonObject.keySet()) {
-                    key = k;
+            String[] elements = variables.split("\\|");
+            for (String element: elements) {
+                String[] entries = element.split("@");
+                if (entries.length >= 2) {
+                    mapping.put(entries[0], entries[1]);
                 }
-                value = jsonObject.getString(key);
-                mapping.put(key, value);
             }
         }
         return mapping;
