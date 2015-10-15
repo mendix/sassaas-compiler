@@ -1,26 +1,23 @@
 package com.mendix.ux.sassaas;
 
-import io.bit3.jsass.Compiler;
-import io.bit3.jsass.Options;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.security.InvalidParameterException;
 import java.util.Collection;
 import java.util.Map;
 
-public class SCSSTemplateProcessor {
-    private final File outputDir;
-    private final File exportFile;
-    private final Map<String, String> mapping;
-    private final Map<String, String> entryPoints;
+public class SCSSProcessorBase {
+    protected final File outputDir;
+    protected final File exportFile;
+    protected final Map<String, String> mapping;
+    protected final Map<String, String> entryPoints;
 
-    public SCSSTemplateProcessor(String inputZipFilePath, Map<String, String> mapping, Map<String, String> entryPoints) throws Exception {
+    public SCSSProcessorBase(String inputZipFilePath, Map<String, String> mapping, Map<String, String> entryPoints) throws Exception {
         outputDir = createTempDir();
         exportFile = File.createTempFile("export", ".zip");
         exportFile.deleteOnExit();
@@ -66,7 +63,7 @@ public class SCSSTemplateProcessor {
         }
     }
 
-    private void applyMapping(Map<String, String> mapping) throws IOException {
+    protected void applyMapping(Map<String, String> mapping) throws IOException {
         String extensions[] = {"scss"};
         Collection files = FileUtils.listFiles(outputDir, extensions, true);
         for (Object file: files) {
@@ -74,7 +71,7 @@ public class SCSSTemplateProcessor {
         }
     }
 
-    private void applyMappingtoFile(File file, Map<String, String> mapping) throws IOException {
+    protected void applyMappingtoFile(File file, Map<String, String> mapping) throws IOException {
         String content = FileUtils.readFileToString(file);
         StringBuilder sb = new StringBuilder();
         String lines[] = content.split("\n");
@@ -90,21 +87,8 @@ public class SCSSTemplateProcessor {
         FileUtils.writeStringToFile(file, sb.toString());
     }
 
-    private void compile(Map.Entry<String, String> entryPoint) throws Exception {
-        File entry = new File(String.format("%s%s%s", outputDir.getAbsoluteFile(), File.separator, entryPoint.getKey()));
-        File output = new File(String.format("%s%s%s", outputDir.getAbsoluteFile(), File.separator, entryPoint.getValue()));
-        if (!entry.exists()) {
-            throw new InvalidParameterException(String.format("Does not exists: %s", entry.getAbsolutePath()));
-        }
-        File parent = output.getParentFile();
-        if (!parent.exists()) {
-            parent.mkdirs();
-        }
-        URI inputURI = entry.toURI();
-        URI outputURI = output.toURI();
-        Compiler compiler = new Compiler();
-        Options options = new Options();
-        compiler.compileFile(inputURI, outputURI, options);
+    protected void compile(Map.Entry<String, String> entryPoint) throws Exception {
+        throw new NotImplementedException("No idea how to compile");
     }
 
     public static File createTempDir() throws IOException {

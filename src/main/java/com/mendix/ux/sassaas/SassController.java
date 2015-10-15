@@ -25,12 +25,12 @@ public class SassController implements SassApi {
     @Override
     @RequestMapping(method = RequestMethod.GET)
     public File compileSass(@RequestParam(value = "variables", required = false) String variables, @RequestParam(value = "entrypoints", required = false) String entrypoints, @RequestParam(value = "output", required = false) String output) throws Exception {
-        SCSSTemplateProcessor processor = null;
+        SCSSProcessorBase processor = null;
         File inputFile = writeInputStreamToFile(getClass().getResourceAsStream("/default-theme.zip"));
         try {
             Map<String, String> mapping = convertFields(variables);
             Map<String, String> entryPoints = convertFields(entrypoints);
-            processor = new SCSSTemplateProcessor(inputFile.getAbsolutePath(), mapping, entryPoints);
+            processor = new SCSSProcessorJsass(inputFile.getAbsolutePath(), mapping, entryPoints);
             processor.compileAll();
             if (response != null) {
                 OutputStream outputStream = response.getOutputStream();
@@ -49,14 +49,14 @@ public class SassController implements SassApi {
         return null;
     }
 
-    private void serveCss(SCSSTemplateProcessor processor, OutputStream out, String outputFilename) throws ZipException, IOException {
+    private void serveCss(SCSSProcessorBase processor, OutputStream out, String outputFilename) throws ZipException, IOException {
         File exported = processor.exportCss();
         response.setContentType("text/css");
         response.setHeader("Content-Disposition", String.format("attachment; filename=compiled-%s", outputFilename));
         out.write(FileUtils.readFileToByteArray(exported));
     }
 
-    private void serveZip(SCSSTemplateProcessor processor, OutputStream out, String outputFilename) throws ZipException, IOException {
+    private void serveZip(SCSSProcessorBase processor, OutputStream out, String outputFilename) throws ZipException, IOException {
         File exported = processor.exportZip();
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", String.format("attachment; filename=compiled-%s", outputFilename));
