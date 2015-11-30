@@ -52,14 +52,14 @@ public class SassController implements SassApi {
     private void serveCss(SCSSProcessorBase processor, OutputStream out, String outputFilename) throws ZipException, IOException {
         File exported = processor.exportCss();
         response.setContentType("text/css");
-        response.setHeader("Content-Disposition", String.format("attachment; filename=compiled-%s", outputFilename));
+        response.setHeader("Content-Disposition", String.format("attachment; filename=windows-%s", outputFilename));
         out.write(FileUtils.readFileToByteArray(exported));
     }
 
     private void serveZip(SCSSProcessorBase processor, OutputStream out, String outputFilename) throws ZipException, IOException {
         File exported = processor.exportZip();
         response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", String.format("attachment; filename=compiled-%s", outputFilename));
+        response.setHeader("Content-Disposition", String.format("attachment; filename=mendix-%s", outputFilename));
         out.write(FileUtils.readFileToByteArray(exported));
     }
 
