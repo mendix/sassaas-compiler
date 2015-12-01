@@ -32,7 +32,7 @@ public class SassControllerTest implements SassApiTests {
         Mockito.when(multipartFile.getInputStream()).thenReturn(getClass().getResourceAsStream("/template.zip"));
 
         // When
-        File output = controller.compileSass(multipartFile, null, null);
+        File output = controller.compileSass("", null, null);
 
 
         // Then

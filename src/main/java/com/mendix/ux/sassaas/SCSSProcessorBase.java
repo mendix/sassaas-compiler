@@ -2,14 +2,19 @@ package com.mendix.ux.sassaas;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.ZipParameters;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class SCSSProcessorBase {
     protected final File outputDir;
@@ -34,12 +39,9 @@ public class SCSSProcessorBase {
         }
     }
 
-    public File exportZip() throws ZipException {
+    public File exportZip() throws ZipException, IOException {
         exportFile.delete(); // ZipFile will create this
-        ZipFile zip = new ZipFile(exportFile);
-        ZipParameters zipParameters = new ZipParameters();
-        zipParameters.setIncludeRootFolder(false);
-        zip.createZipFileFromFolder(outputDir.getAbsolutePath(), zipParameters, false, -1);
+        zipFolder(outputDir, exportFile.getAbsolutePath());
         return exportFile;
     }
 
@@ -96,5 +98,28 @@ public class SCSSProcessorBase {
         temp.delete();
         temp.mkdir();
         return temp;
+    }
+
+    protected void zipFolder(File inputDirectory, String outputName) throws IOException {
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(outputName));
+        try {
+            Collection<File> files = FileUtils.listFiles(inputDirectory, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+            int truncate = inputDirectory.getPath().length() + 1; // remove extra character being slash /
+            for (File file : files){
+                ZipEntry entry = new ZipEntry(file.getPath().substring(truncate));
+                entry.setSize(file.length());
+                entry.setTime(file.lastModified());
+                out.putNextEntry(entry);
+                FileInputStream in = new FileInputStream(file);
+                try {
+                    IOUtils.copy(in, out);
+                } finally {
+                    IOUtils.closeQuietly(in);
+                }
+                out.closeEntry();
+            }
+        } finally {
+            IOUtils.closeQuietly(out);
+        }
     }
 }

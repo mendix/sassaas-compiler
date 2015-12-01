@@ -39,8 +39,8 @@ public class SassController implements SassApi {
                 } else {
                     serveZip(processor, outputStream, "theme.zip");
                 }
-                IOUtils.closeQuietly(outputStream);
                 response.flushBuffer();
+                IOUtils.closeQuietly(outputStream);
             }
         } finally {
             if (processor != null) processor.cleanup();
