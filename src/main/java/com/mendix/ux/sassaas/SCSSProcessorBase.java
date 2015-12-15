@@ -68,8 +68,12 @@ public class SCSSProcessorBase {
     protected void applyMapping(Map<String, String> mapping) throws IOException {
         String extensions[] = {"scss"};
         Collection files = FileUtils.listFiles(outputDir, extensions, true);
+
+        File current;
         for (Object file: files) {
-            applyMappingtoFile((File) file, mapping);
+            current = (File) file;
+            if (current.getName().equals("_custom-variables.scss"))
+                applyMappingtoFile((File) file, mapping);
         }
     }
 
