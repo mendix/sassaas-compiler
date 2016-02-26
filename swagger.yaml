@@ -39,8 +39,35 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /sessions/{sessionId}/logo:
+    post:
+      x-swagger-router-controller: Sessions
+      description: Upload a logo
+      operationId: uploadLogo
+      parameters:
+        - name: sessionId
+          in: path
+          type: string
+        - name: logo
+          in: formData
+          type: file
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/ResultResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 definitions:
   ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  ResultResponse:
     required:
       - message
     properties:
