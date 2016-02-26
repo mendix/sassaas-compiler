@@ -3,6 +3,8 @@ package com.mendix.ux.sassaas;
 import com.mendix.ux.sassaas.specs.api.SessionsApi;
 import com.mendix.ux.sassaas.specs.model.KeyValue;
 import com.mendix.ux.sassaas.specs.model.ResultResponse;
+import com.mendix.ux.sassaas.utils.SassCompiler;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
@@ -12,9 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.List;
 
 @RestController
@@ -28,6 +28,25 @@ public class SessionsController implements SessionsApi {
     HttpServletRequest request;
 
     private final String VARIABLE_FILENAME = "custom_variables.json";
+    private final String WORKSPACE_NAME = "workspace";
+    private final String OUTPUT_CSS = "out.css";
+    private final String OUTPUT_ZIP = "out.zip";
+
+    @Override
+    @RequestMapping(value="/css", method = RequestMethod.GET)
+    public File getCSSOutput(@PathVariable("sessionId") String sessionId) throws Exception {
+        File inputFile = writeInputStreamToFile(sessionId, getClass().getResourceAsStream("/default-theme.zip"));
+        File sessionDir = getSessionDir(sessionId);
+        File variables = new File(sessionDir, VARIABLE_FILENAME);
+        File workspace = new File(sessionDir, WORKSPACE_NAME);
+        File cssOutFile = new File(sessionDir, OUTPUT_CSS);
+        SassCompiler compiler = new SassCompiler(inputFile, workspace, variables, null);
+        compiler.exportCss(cssOutFile.getAbsolutePath());
+        response.setContentType("text/css");
+        response.setHeader("Content-Disposition", String.format("attachment; filename=windows-%s", "out.css"));
+        response.getOutputStream().write(FileUtils.readFileToByteArray(cssOutFile));
+        return null;
+    }
 
     @Override
     @RequestMapping(value="/logo", method = RequestMethod.POST)
@@ -78,5 +97,17 @@ public class SessionsController implements SessionsApi {
         if (sessionId != null && sessionId.matches("[a-zA-Z0-9-]+"))
             return;
         throw new IllegalArgumentException("Invalid session format");
+    }
+
+    private File writeInputStreamToFile(String sessionId, InputStream inputStream) throws IOException {
+        File outfile = new File(getSessionDir(sessionId), "input.zip");
+        FileOutputStream outStream = new FileOutputStream(outfile);
+        try {
+            IOUtils.copy(inputStream, outStream);
+        } finally {
+            IOUtils.closeQuietly(outStream);
+            IOUtils.closeQuietly(inputStream);
+        }
+        return outfile;
     }
 }

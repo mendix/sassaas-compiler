@@ -6,9 +6,9 @@ package com.mendix.ux.sassaas.specs.api;
 
 import com.mendix.ux.sassaas.specs.model.*;
 
-import com.mendix.ux.sassaas.specs.model.ResultResponse;
 import java.io.File;
 import com.mendix.ux.sassaas.specs.model.ErrorResponse;
+import com.mendix.ux.sassaas.specs.model.ResultResponse;
 import com.mendix.ux.sassaas.specs.model.KeyValue;
 import java.util.*;
 
@@ -29,6 +29,24 @@ import static org.springframework.http.MediaType.*;
 public interface SessionsApi {
     /* @Api(value = "/sessions", description = "The sessions API") */
 
+
+        /**
+        * @ApiOperation(value = "", notes = "Get compiled CSS output", response = File.class)
+        * Parameters:
+        * @ApiParam(value = "",required=true ) String sessionId
+        *
+        * @ApiResponses(value = { 
+        *     @ApiResponse(code = 200, message = "Success"),
+        *     @ApiResponse(code = 0, message = "Error") })
+        **/
+        @RequestMapping(value = "/{sessionId}/css",
+
+
+        method = RequestMethod.GET)
+        public File getCSSOutput(
+@PathVariable("sessionId") String sessionId
+)
+        throws Exception;
 
         /**
         * @ApiOperation(value = "", notes = "Upload a logo", response = ResultResponse.class)
