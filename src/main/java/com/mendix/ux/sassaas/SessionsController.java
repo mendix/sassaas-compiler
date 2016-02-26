@@ -121,6 +121,7 @@ public class SessionsController implements SessionsApi {
     }
 
     @Override
+    @CrossOrigin(origins = "*")
     @RequestMapping(value="/variables", method = RequestMethod.PUT)
     public ResultResponse setVariables(@PathVariable("sessionId") String sessionId, @RequestBody List<KeyValue> variables) throws Exception {
         validateSessionId(sessionId);
