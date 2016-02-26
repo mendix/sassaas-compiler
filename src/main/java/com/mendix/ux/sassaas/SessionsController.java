@@ -4,10 +4,11 @@ import com.mendix.ux.sassaas.specs.api.SessionsApi;
 import com.mendix.ux.sassaas.specs.model.KeyValue;
 import com.mendix.ux.sassaas.specs.model.ResultResponse;
 import com.mendix.ux.sassaas.utils.SassCompiler;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/sessions/{sessionId}")
 public class SessionsController implements SessionsApi {
+
+    private final static Logger logger = LoggerFactory.getLogger(SessionsController.class);
 
     @Autowired
     HttpServletResponse response;
@@ -43,8 +46,17 @@ public class SessionsController implements SessionsApi {
         SassCompiler compiler = new SassCompiler(inputFile, workspace, variables, null);
         compiler.exportCss(cssOutFile.getAbsolutePath());
         response.setContentType("text/css");
-        response.setHeader("Content-Disposition", String.format("attachment; filename=windows-%s", "out.css"));
-        response.getOutputStream().write(FileUtils.readFileToByteArray(cssOutFile));
+        response.setHeader("Content-Disposition", String.format("attachment; filename=windows-%s", OUTPUT_CSS));
+        InputStream inputStream = new FileInputStream(cssOutFile);
+        OutputStream outputStream = response.getOutputStream();
+        try {
+            IOUtils.copy(inputStream, outputStream);
+        } catch (IOException e) {
+            logger.info(e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(outputStream);
+        }
         return null;
     }
 
@@ -83,6 +95,31 @@ public class SessionsController implements SessionsApi {
         ResultResponse result = new ResultResponse();
         result.setMessage("Variables are saved");
         return result;
+    }
+
+    @Override
+    @RequestMapping(value="/zip", method = RequestMethod.GET)
+    public File getZipOutput(@PathVariable("sessionId") String sessionId) throws Exception {
+        File inputFile = writeInputStreamToFile(sessionId, getClass().getResourceAsStream("/default-theme.zip"));
+        File sessionDir = getSessionDir(sessionId);
+        File variables = new File(sessionDir, VARIABLE_FILENAME);
+        File workspace = new File(sessionDir, WORKSPACE_NAME);
+        File zipOutFile = new File(sessionDir, OUTPUT_ZIP);
+        SassCompiler compiler = new SassCompiler(inputFile, workspace, variables, null);
+        compiler.exportZip(zipOutFile.getAbsolutePath());
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", String.format("attachment; filename=mendix-%s", OUTPUT_ZIP));
+        InputStream inputStream = new FileInputStream(zipOutFile);
+        OutputStream outputStream = response.getOutputStream();
+        try {
+            IOUtils.copy(inputStream, outputStream);
+        } catch (IOException e) {
+            logger.info(e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(outputStream);
+        }
+        return null;
     }
 
     private File getSessionDir(String sessionId) {

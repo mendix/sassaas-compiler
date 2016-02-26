@@ -102,6 +102,24 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /sessions/{sessionId}/zip:
+    get:
+      x-swagger-router-controller: Sessions
+      description: Get compiled Zip output
+      operationId: getZipOutput
+      parameters:
+        - name: sessionId
+          in: path
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: "file"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 definitions:
   ErrorResponse:
     required:

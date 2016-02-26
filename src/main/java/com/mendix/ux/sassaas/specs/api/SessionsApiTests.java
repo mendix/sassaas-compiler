@@ -26,4 +26,12 @@ public interface SessionsApiTests {
     **/
     public void setVariables() throws Exception;
 
+    /**
+    * @ApiOperation(value = "", notes = "Get compiled Zip output", response = File.class)
+    * @ApiResponses(value = { 
+        *     @ApiResponse(code = 200, message = "Success"),
+        *     @ApiResponse(code = 0, message = "Error") })
+    **/
+    public void getZipOutput() throws Exception;
+
 }

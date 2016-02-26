@@ -89,4 +89,22 @@ public interface SessionsApi {
 
 List<KeyValue> variables)
         throws Exception;
+
+        /**
+        * @ApiOperation(value = "", notes = "Get compiled Zip output", response = File.class)
+        * Parameters:
+        * @ApiParam(value = "",required=true ) String sessionId
+        *
+        * @ApiResponses(value = { 
+        *     @ApiResponse(code = 200, message = "Success"),
+        *     @ApiResponse(code = 0, message = "Error") })
+        **/
+        @RequestMapping(value = "/{sessionId}/zip",
+
+
+        method = RequestMethod.GET)
+        public File getZipOutput(
+@PathVariable("sessionId") String sessionId
+)
+        throws Exception;
     }

@@ -130,7 +130,7 @@ public class SassCompiler {
         }
     }
 
-    private void exportZip(String outputPath) throws IOException {
+    public void exportZip(String outputPath) throws IOException {
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(outputPath));
         try {
             Collection<File> files = FileUtils.listFiles(this.workingDirectory, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
