@@ -116,7 +116,7 @@ public class SessionsController implements SessionsApi {
             IOUtils.closeQuietly(outputStream1);
         }
         ResultResponse result = new ResultResponse();
-        result.setMessage("Upload completed");
+        result.setMessage(targetFilename);
         return result;
     }
 
