@@ -6,6 +6,7 @@ import java.io.File;
 import java.security.InvalidParameterException;
 import java.util.Map;
 
+@Deprecated
 public class SCSSProcessorVaadin extends SCSSProcessorBase {
 
     public SCSSProcessorVaadin(String inputZipFilePath, Map<String, String> mapping, Map<String, String> entryPoints) throws Exception {

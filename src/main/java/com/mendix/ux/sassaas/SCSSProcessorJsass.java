@@ -10,6 +10,7 @@ import java.net.URI;
 import java.security.InvalidParameterException;
 import java.util.Map;
 
+@Deprecated
 public class SCSSProcessorJsass extends SCSSProcessorBase {
 
     public SCSSProcessorJsass(String inputZipFilePath, Map<String, String> mapping, Map<String, String> entryPoints) throws Exception {

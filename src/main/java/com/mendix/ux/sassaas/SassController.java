@@ -15,6 +15,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 @RestController
 @RequestMapping("/v1/sass")
 public class SassController implements SassApi {

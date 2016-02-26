@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@Deprecated
 public class SCSSProcessorBase {
     protected final File outputDir;
     protected final File exportFile;
