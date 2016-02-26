@@ -35,7 +35,7 @@ public class SessionsController implements SessionsApi {
     private final String VARIABLE_FILENAME = "custom_variables.json";
     private final String WORKSPACE_NAME = "workspace";
     private final String OUTPUT_CSS = "out.css";
-    private final String OUTPUT_ZIP = "out.zip";
+    private final String OUTPUT_ZIP = "theme.zip";
     private final String METADATA = "metadata.json";
     private final String METADATA_LOGO = "logo";
 
