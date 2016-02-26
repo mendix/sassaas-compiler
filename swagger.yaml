@@ -60,6 +60,30 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /sessions/{sessionId}/variables:
+    put:
+      x-swagger-router-controller: Sessions
+      description: Set variable values
+      operationId: setVariables
+      parameters:
+        - name: sessionId
+          in: path
+          type: string
+        - name: variables
+          in: body
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/KeyValue"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/ResultResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 definitions:
   ErrorResponse:
     required:
@@ -72,4 +96,13 @@ definitions:
       - message
     properties:
       message:
+        type: string
+  KeyValue:
+    required:
+      - key
+      - value
+    properties:
+      key:
+        type: string
+      value:
         type: string

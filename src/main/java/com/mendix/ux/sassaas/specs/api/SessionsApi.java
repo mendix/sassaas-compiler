@@ -9,6 +9,8 @@ import com.mendix.ux.sassaas.specs.model.*;
 import com.mendix.ux.sassaas.specs.model.ResultResponse;
 import java.io.File;
 import com.mendix.ux.sassaas.specs.model.ErrorResponse;
+import com.mendix.ux.sassaas.specs.model.KeyValue;
+import java.util.*;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,5 +49,26 @@ public interface SessionsApi {
 ,
 
 @RequestPart("file") MultipartFile fileDetail)
+        throws Exception;
+
+        /**
+        * @ApiOperation(value = "", notes = "Set variable values", response = ResultResponse.class)
+        * Parameters:
+        * @ApiParam(value = "",required=true ) String sessionId
+        * @ApiParam(value = ""  ) List<KeyValue> variables
+        *
+        * @ApiResponses(value = { 
+        *     @ApiResponse(code = 200, message = "Success"),
+        *     @ApiResponse(code = 0, message = "Error") })
+        **/
+        @RequestMapping(value = "/{sessionId}/variables",
+
+
+        method = RequestMethod.PUT)
+        public ResultResponse setVariables(
+@PathVariable("sessionId") String sessionId
+,
+
+List<KeyValue> variables)
         throws Exception;
     }
