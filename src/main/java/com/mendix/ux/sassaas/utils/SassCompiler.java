@@ -46,7 +46,8 @@ public class SassCompiler {
             this.targets = targets;
         }
         extractBase(inputZip);
-        applyVariables(variables);
+        if (variables.isFile())
+            applyVariables(variables);
         for (KeyValue item: this.targets)
             compile(item);
     }
