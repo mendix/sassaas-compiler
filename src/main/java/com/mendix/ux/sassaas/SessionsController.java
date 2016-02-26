@@ -12,12 +12,14 @@ import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URL;
 import java.util.List;
 
 @RestController
@@ -38,6 +40,29 @@ public class SessionsController implements SessionsApi {
     private final String OUTPUT_ZIP = "theme.zip";
     private final String METADATA = "metadata.json";
     private final String METADATA_LOGO = "logo";
+    private final String DEFAULT_THEME = "mendix-ui-theme-silverlinings";
+    private final String METADATA_THEME = "theme";
+
+    @Value(value = "${basethemeurl:http://localhost:8000}")
+    private String BASE_THEME_URL;
+
+    @Override
+    @RequestMapping(value="", method = RequestMethod.PUT)
+    public ResultResponse createSession(@PathVariable("sessionId") String sessionId, @RequestParam(value = "theme", required = false) String theme) throws Exception {
+        validateSessionId(sessionId);
+        validateSessionId(theme);
+        if (theme == null)
+            theme = DEFAULT_THEME;
+
+        File sessionDir = getSessionDir(sessionId);
+        JSONObject metadata = loadMetadata(sessionDir);
+        metadata.put(METADATA_THEME, theme);
+        saveMetadata(metadata, sessionDir);
+
+        ResultResponse result = new ResultResponse();
+        result.setMessage(theme);
+        return result;
+    }
 
     @Override
     @RequestMapping(value="/css", method = RequestMethod.GET)
@@ -70,12 +95,12 @@ public class SessionsController implements SessionsApi {
     public File getLogo(@PathVariable("sessionId") String sessionId) throws Exception {
         validateSessionId(sessionId);
         File sessionDir = getSessionDir(sessionId);
-        File metadata = new File(sessionDir, METADATA);
-        String metadataString = FileUtils.readFileToString(metadata);
-        JSONTokener tokener = new JSONTokener(metadataString);
-        JSONObject jsonObject = new JSONObject(tokener);
-        String filename = jsonObject.getString(METADATA_LOGO);
+        JSONObject metadata = loadMetadata(sessionDir);
+        String filename = metadata.getString(METADATA_LOGO);
         File logo = new File(sessionDir, filename);
+        if (!logo.isFile()) {
+            throw new IllegalAccessException("Logo not found");
+        }
         response.setContentType("image");
         response.setHeader("Content-Disposition", String.format("attachment; filename=%s", filename));
         InputStream inputStream = new FileInputStream(logo);
@@ -107,15 +132,9 @@ public class SessionsController implements SessionsApi {
             IOUtils.closeQuietly(outputStream);
             IOUtils.closeQuietly(fileDetail.getInputStream());
         }
-        File logoMetadata = new File(sessionDir, METADATA);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(METADATA_LOGO, targetFilename);
-        FileOutputStream outputStream1 = new FileOutputStream(logoMetadata);
-        try {
-            outputStream1.write(jsonObject.toString(2).getBytes());
-        } finally {
-            IOUtils.closeQuietly(outputStream1);
-        }
+        JSONObject metadata = loadMetadata(sessionDir);
+        metadata.put(METADATA_LOGO, targetFilename);
+        saveMetadata(metadata, sessionDir);
         ResultResponse result = new ResultResponse();
         result.setMessage(targetFilename);
         return result;
@@ -168,7 +187,7 @@ public class SessionsController implements SessionsApi {
     }
 
     private File getSessionDir(String sessionId) {
-        File sessionDir = new File(Application.SESSION_DIR, sessionId);
+        File sessionDir = new File(Application.CACHE_DIR, sessionId);
         if (!sessionDir.isDirectory()) {
             sessionDir.mkdir();
         }
@@ -181,7 +200,39 @@ public class SessionsController implements SessionsApi {
         throw new IllegalArgumentException("Invalid session format");
     }
 
+    private File downloadTheme(String theme) throws IOException {
+        File themesDir = new File(Application.CACHE_DIR, "__" + theme); // enduser cannot use this *special* session
+        if (!themesDir.isDirectory())
+            themesDir.mkdirs();
+        File themeFile = new File(themesDir, theme + ".zip");
+        if (!themeFile.isFile()) {
+            try {
+                URL url = new URL(String.format("%s/%s.zip", BASE_THEME_URL, theme));
+                logger.info("Fetching theme: " + url);
+                FileUtils.copyURLToFile(url, themeFile);
+                logger.info("Finished downloading to: " + themeFile);
+            } catch (IOException e) {
+                if (themeFile.isFile())
+                    themeFile.delete();
+                throw e;
+            }
+        } else {
+            logger.info("Using cached theme: " + themeFile);
+        }
+        return themeFile;
+    }
+
     private File writeInputStreamToFile(String sessionId, InputStream inputStream) throws IOException {
+        File sessionDir = getSessionDir(sessionId);
+        JSONObject metadata = loadMetadata(sessionDir);
+        if (metadata.has(METADATA_THEME)) {
+            String theme = metadata.getString(METADATA_THEME);
+            logger.info("Using non internal theme: " + theme);
+            File themeFile = downloadTheme(theme);
+            IOUtils.closeQuietly(inputStream); // re-open new one
+            inputStream = new FileInputStream(themeFile);
+        }
+
         File outfile = new File(getSessionDir(sessionId), "input.zip");
         FileOutputStream outStream = new FileOutputStream(outfile);
         try {
@@ -191,5 +242,25 @@ public class SessionsController implements SessionsApi {
             IOUtils.closeQuietly(inputStream);
         }
         return outfile;
+    }
+
+    private JSONObject loadMetadata(File sessionDir) throws IOException {
+        File metadata = new File(sessionDir, METADATA);
+        if (!metadata.isFile()) {
+            return new JSONObject();
+        }
+        String metadataString = FileUtils.readFileToString(metadata);
+        JSONTokener tokener = new JSONTokener(metadataString);
+        return new JSONObject(tokener);
+    }
+
+    private void saveMetadata(JSONObject metadata, File sessionDir) throws IOException {
+        File metadataFile = new File(sessionDir, METADATA);
+        FileOutputStream outputStream1 = new FileOutputStream(metadataFile);
+        try {
+            outputStream1.write(metadata.toString(2).getBytes());
+        } finally {
+            IOUtils.closeQuietly(outputStream1);
+        }
     }
 }

@@ -8,7 +8,7 @@ import java.io.File;
 @SpringBootApplication
 public class Application {
 
-    public static File SESSION_DIR = new File("cache");
+    public static File CACHE_DIR = new File("cache");
 
     public static void main(String[] args) {
         ensureSessionDir();
@@ -16,8 +16,8 @@ public class Application {
     }
 
     private static void ensureSessionDir() {
-        if (!SESSION_DIR.isDirectory()) {
-            SESSION_DIR.mkdirs();
+        if (!CACHE_DIR.isDirectory()) {
+            CACHE_DIR.mkdirs();
         }
     }
 }

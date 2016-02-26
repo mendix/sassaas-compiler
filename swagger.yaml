@@ -39,6 +39,27 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /sessions/{sessionId}:
+    put:
+      x-swagger-router-controller: Sessions
+      description: New session
+      operationId: createSession
+      parameters:
+        - name: sessionId
+          in: path
+          type: string
+        - name: theme
+          in: query
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/ResultResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /sessions/{sessionId}/logo:
     post:
       x-swagger-router-controller: Sessions

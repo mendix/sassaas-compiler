@@ -33,7 +33,7 @@ public class GarbageCollector {
         int removedCount = 0;
         int activeCount = 0;
         int failedCount = 0;
-        File[] sessions = Application.SESSION_DIR.listFiles();
+        File[] sessions = Application.CACHE_DIR.listFiles();
         if (sessions.length < KEEP) {
             logger.debug("Backing off cache clean up because of low usage. Current active sessions = " + sessions.length);
             return;
