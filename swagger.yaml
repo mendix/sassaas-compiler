@@ -60,6 +60,23 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+    get:
+      x-swagger-router-controller: Sessions
+      description: Get uploaded logo
+      operationId: getLogo
+      parameters:
+        - name: sessionId
+          in: path
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: "file"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /sessions/{sessionId}/variables:
     put:
       x-swagger-router-controller: Sessions

@@ -11,6 +11,14 @@ public interface SessionsApiTests {
     public void getCSSOutput() throws Exception;
 
     /**
+    * @ApiOperation(value = "", notes = "Get uploaded logo", response = File.class)
+    * @ApiResponses(value = { 
+        *     @ApiResponse(code = 200, message = "Success"),
+        *     @ApiResponse(code = 0, message = "Error") })
+    **/
+    public void getLogo() throws Exception;
+
+    /**
     * @ApiOperation(value = "", notes = "Upload a logo", response = ResultResponse.class)
     * @ApiResponses(value = { 
         *     @ApiResponse(code = 200, message = "Success"),

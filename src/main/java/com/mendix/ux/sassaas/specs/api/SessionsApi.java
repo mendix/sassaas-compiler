@@ -49,6 +49,24 @@ public interface SessionsApi {
         throws Exception;
 
         /**
+        * @ApiOperation(value = "", notes = "Get uploaded logo", response = File.class)
+        * Parameters:
+        * @ApiParam(value = "",required=true ) String sessionId
+        *
+        * @ApiResponses(value = { 
+        *     @ApiResponse(code = 200, message = "Success"),
+        *     @ApiResponse(code = 0, message = "Error") })
+        **/
+        @RequestMapping(value = "/{sessionId}/logo",
+
+
+        method = RequestMethod.GET)
+        public File getLogo(
+@PathVariable("sessionId") String sessionId
+)
+        throws Exception;
+
+        /**
         * @ApiOperation(value = "", notes = "Upload a logo", response = ResultResponse.class)
         * Parameters:
         * @ApiParam(value = "",required=true ) String sessionId
