@@ -92,6 +92,7 @@ public class SessionsController implements SessionsApi {
     }
 
     @Override
+    @CrossOrigin(origins = "*")
     @RequestMapping(value="/logo", method = RequestMethod.POST)
     public ResultResponse uploadLogo(@PathVariable("sessionId") String sessionId, @RequestPart("file") MultipartFile fileDetail) throws Exception {
         validateSessionId(sessionId);
