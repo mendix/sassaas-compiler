@@ -123,15 +123,30 @@ public class SessionsController implements SessionsApi {
     @RequestMapping(value="/logo", method = RequestMethod.POST)
     public ResultResponse uploadLogo(@PathVariable("sessionId") String sessionId, @RequestPart("file") MultipartFile fileDetail) throws Exception {
         validateSessionId(sessionId);
+        File inputFile = writeInputStreamToFile(sessionId, getClass().getResourceAsStream("/default-theme.zip"));
         String extension = FilenameUtils.getExtension(fileDetail.getOriginalFilename());
         String targetFilename = String.format("logo.%s", extension);
         File sessionDir = getSessionDir(sessionId);
+        File variables = new File(sessionDir, VARIABLE_FILENAME);
+        File workspace = new File(sessionDir, WORKSPACE_NAME);
+        new SassCompiler(inputFile, workspace, variables, null);
+
         File outfile = new File(sessionDir, targetFilename);
+        File outfileWorkspace = new File(workspace, targetFilename);
+        if (outfileWorkspace.exists()) {
+            outfileWorkspace.delete();
+        }
+        if (outfile.exists()) {
+            outfile.delete();
+        }
         OutputStream outputStream = new FileOutputStream(outfile);
+        OutputStream outputStreamWorkspace = new FileOutputStream(outfileWorkspace);
         try {
             IOUtils.copy(fileDetail.getInputStream(), outputStream);
+            IOUtils.copy(fileDetail.getInputStream(), outputStreamWorkspace);
         } finally {
             IOUtils.closeQuietly(outputStream);
+            IOUtils.closeQuietly(outputStreamWorkspace);
             IOUtils.closeQuietly(fileDetail.getInputStream());
         }
         JSONObject metadata = loadMetadata(sessionDir);
