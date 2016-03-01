@@ -86,6 +86,8 @@ public class SessionsController implements SessionsApi {
         } finally {
             IOUtils.closeQuietly(inputStream);
             IOUtils.closeQuietly(outputStream);
+            cssOutFile.delete();
+            logger.info("Finished serving file: "+ cssOutFile);
         }
         return null;
     }
@@ -182,6 +184,8 @@ public class SessionsController implements SessionsApi {
         } finally {
             IOUtils.closeQuietly(inputStream);
             IOUtils.closeQuietly(outputStream);
+            zipOutFile.delete();
+            logger.info("Finished serving file: "+ zipOutFile);
         }
         return null;
     }
